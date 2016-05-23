@@ -1,10 +1,15 @@
 package com.rede.project.resource;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -12,7 +17,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import com.rede.project.model.City;
+import com.rede.project.Exception.CityNotFoundException;
+import com.rede.project.logic.DistanceLogic;
 import com.rede.project.provider.CityProviderEnum;
 
 public class CityResource {
@@ -68,6 +74,7 @@ public class CityResource {
 			throw new RuntimeException(id + " not found");
 		}
 	}
+	
 	
 	public Response putAndGetResponse(City city){
 		

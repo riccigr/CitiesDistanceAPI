@@ -3,7 +3,7 @@ package com.rede.project.provider;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.rede.project.model.City;
+import com.rede.project.resource.City;
 
 public enum CityProviderEnum {
 	instance;
@@ -16,6 +16,9 @@ public enum CityProviderEnum {
 		
 		city = new City("2", "Sao Paulo", -23.5505199, -46.6333094);
 		contentProvider.put("2", city);
+		
+		city = new City("3", "Buenos Aires", -34.603684, -58.381559);
+		contentProvider.put("3", city);
 
 	}
 	
