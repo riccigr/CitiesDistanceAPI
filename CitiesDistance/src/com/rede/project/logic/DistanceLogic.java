@@ -1,5 +1,8 @@
 package com.rede.project.logic;
 
+import java.util.Map;
+
+import com.rede.project.dao.CityDAO;
 import com.rede.project.resource.City;
 
 public class DistanceLogic {
@@ -13,36 +16,33 @@ public class DistanceLogic {
 				* Math.cos(Math.toRadians(latCityB)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
 
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		double dist = (earthradius * c) / 1000;
+		return (earthradius * c) / 1000;
 		
-		return dist;
 	}
 	
 	private double convertKmToMiles(double km){
-		double miles = km * 0.621;
-		return miles;
+		return km * 0.621;		
 	}
 	
 	
 	public double getDistance(City cityA, City cityB, String unit ){
-		double distance = 0;
 		
-		double latCityA, latCityB, lngCityA, lngCityB;
 		
-		latCityA = cityA.getLatitude();
-		latCityB = cityB.getLatitude();
-		lngCityA = cityA.getLongitude();
-		lngCityB = cityB.getLongitude();
+		Map<String, Double> mapCityA = new CityDAO().getLatLongById(cityA.getId());
+		Map<String, Double> mapCityB = new CityDAO().getLatLongById(cityB.getId());
 		
-		distance = calculeHaversine(latCityA, latCityB, lngCityA, lngCityB);	
+		double latCityA = mapCityA.get("latitude").doubleValue();
+		double latCityB = mapCityB.get("latitude").doubleValue();
+		double lngCityA = mapCityA.get("longitude").doubleValue();
+		double lngCityB = mapCityB.get("longitude").doubleValue();
 		
-		if(unit != null && unit.toUpperCase().equals("MILES")){
+		double distance = calculeHaversine(latCityA, latCityB, lngCityA, lngCityB);	
+		
+		if(unit != null && "MILES".equalsIgnoreCase(unit)){
 			distance = convertKmToMiles(distance);		
 		}
 		
-		distance = (double) Math.round(distance * 100) / 100;
-		
-		return distance;
+		return (double) Math.round(distance * 100) / 100;		
 	}
 	
 }

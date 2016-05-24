@@ -6,9 +6,9 @@ import java.util.Map;
 import com.rede.project.resource.City;
 
 public enum CityProviderEnum {
-	instance;
+	INSTANCE;
 
-	private Map<String, City> contentProvider = new HashMap<String, City>();
+	private Map<String, City> contentProvider = new HashMap<>();
 
 	private CityProviderEnum() {
 		City city = new City("1", "New York", 40.7143528, -74.0059731);

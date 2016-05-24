@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,7 +18,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import com.rede.project.Exception.CityNotFoundException;
+import org.jfree.util.Log;
+
+import com.rede.project.exception.CityNotFoundException;
 import com.rede.project.logic.DistanceLogic;
 import com.rede.project.provider.CityProviderEnum;
 
@@ -36,29 +37,28 @@ public class CitiesResource {
 	@GET
 	@Produces(MediaType.TEXT_XML)
 	public List<City> getCitiesBrowser(){
-		List<City> cities = new ArrayList<City>();
-		cities.addAll(CityProviderEnum.instance.getModel().values());
+		List<City> cities = new ArrayList<>();
+		cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
 		return cities;
 	}
 	
 	@GET
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public List<City> getCities(){
+		List<City> cities = new ArrayList<>();
 		try{
-			List<City> cities = new ArrayList<City>();
-			cities.addAll(CityProviderEnum.instance.getModel().values());
-			return cities;
+			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
 		}catch(Exception e){
-			e.printStackTrace();
+			Log.error(e);
 		}
-		return null;
+		return cities;
 	}
 	
 	@GET
 	@Path("count")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getCount(){
-		int count = CityProviderEnum.instance.getModel().size();
+		int count = CityProviderEnum.INSTANCE.getModel().size();
 		return Response.ok(String.valueOf(count)).build();
 	}
 	
@@ -67,13 +67,12 @@ public class CitiesResource {
 	public Response createCity(@FormParam("id") String id,
 						@FormParam("name") String name,
 						@FormParam("latitude") double latitude,
-						@FormParam("longitude") double longitude,
-						@Context HttpServletResponse servletResponse) throws IOException{
+						@FormParam("longitude") double longitude) throws IOException{
 		
 		City city = new City(id, name, latitude, longitude);
 		
 		
-		CityProviderEnum.instance.getModel().put(id, city);	
+		CityProviderEnum.INSTANCE.getModel().put(id, city);	
 		
 		URI createdURI = uriInfo.getAbsolutePath();
 		
@@ -87,20 +86,17 @@ public class CitiesResource {
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public Response getDistance(@QueryParam("cityA") String idCityA,
 								@QueryParam("cityB") String idCityB,
-								@QueryParam("unit") String unit,
-								@Context HttpServletResponse servletResponse) throws IOException{
+								@QueryParam("unit") String unit) throws IOException{
 		
-		City cityA = CityProviderEnum.instance.getModel().get(idCityA);
-		City cityB = CityProviderEnum.instance.getModel().get(idCityB);		
+		City cityA = CityProviderEnum.INSTANCE.getModel().get(idCityA);
+		City cityB = CityProviderEnum.INSTANCE.getModel().get(idCityB);		
 		
 		if(cityA == null || cityB == null){
 			throw new CityNotFoundException();
 		}
 		
-		double distance = 0;
-		distance = new DistanceLogic().getDistance(cityA, cityB, unit);			
+		double distance = new DistanceLogic().getDistance(cityA, cityB, unit);			
 		
-		//return String.valueOf(distance);
 		return Response.ok(String.valueOf(distance)).build();
 		
 	}
