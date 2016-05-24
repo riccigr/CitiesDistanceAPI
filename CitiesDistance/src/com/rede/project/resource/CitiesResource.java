@@ -18,9 +18,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.jfree.util.Log;
-
+import com.rede.project.dao.CityDAO;
 import com.rede.project.exception.CityNotFoundException;
+import com.rede.project.log.LogHelper;
 import com.rede.project.logic.DistanceLogic;
 import com.rede.project.provider.CityProviderEnum;
 
@@ -49,7 +49,7 @@ public class CitiesResource {
 		try{
 			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
 		}catch(Exception e){
-			Log.error(e);
+			e.getMessage();
 		}
 		return cities;
 	}
@@ -70,14 +70,17 @@ public class CitiesResource {
 						@FormParam("longitude") double longitude) throws IOException{
 		
 		City city = new City(id, name, latitude, longitude);
+		try{
+			new CityDAO().createCity(city);			
+		}catch(Exception e){
+			LogHelper.log.error(e);
+			return Response.serverError().build();
+		}
 		
-		
-		CityProviderEnum.INSTANCE.getModel().put(id, city);	
-		
+		CityProviderEnum.INSTANCE.getModel().put(id, city);			
 		URI createdURI = uriInfo.getAbsolutePath();
 		
-		return Response.created(createdURI).entity("City Created").build();
-		
+		return Response.created(createdURI).entity("City Created").build();		
 		
 	}
 	
