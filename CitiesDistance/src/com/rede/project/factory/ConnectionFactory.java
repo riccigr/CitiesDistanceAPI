@@ -26,7 +26,7 @@ public class ConnectionFactory {
 			String port = "3306";
 			String url = "jdbc:mysql://" + serverName +":"+ port + "/" + mydatabase;
 			String username = "root";
-			String password = Utils.getDatabaseAccess();
+			String password = "admin";//Utils.getDatabaseAccess();
 
 			return DriverManager.getConnection(url, username, password);
 

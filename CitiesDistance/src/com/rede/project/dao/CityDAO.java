@@ -6,8 +6,9 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jfree.util.Log;
+
 import com.rede.project.factory.ConnectionFactory;
-import com.rede.project.log.LogHelper;
 import com.rede.project.resource.City;
 
 public class CityDAO {
@@ -40,14 +41,14 @@ public class CityDAO {
 			connection.close();
 
 		} catch (Exception e) {
-			LogHelper.log.error(e);
+			Log.error(e);
 			return null;
 		}
 
 		return result;
 
 	}
-	
+
 	public Map<String, City> getCity(String idCity) {
 
 		HashMap<String, City> result = new HashMap<>();
@@ -80,7 +81,46 @@ public class CityDAO {
 			connection.close();
 
 		} catch (Exception e) {
-			LogHelper.log.error(e);
+			Log.error(e);
+			return null;
+		}
+
+		return result;
+
+	}
+	
+	public Map<String, City> getCities() {
+
+		HashMap<String, City> result = new HashMap<>();
+		String id;
+		String name;
+		double latitude;
+		double longitude;
+
+		try {
+			String sql = "select id, name, latitude, longitude from city";
+
+			PreparedStatement stm = this.connection.prepareStatement(sql);
+
+			ResultSet rs = stm.executeQuery();
+
+			while (rs.next()) {
+				id = rs.getString("id");
+				name = rs.getString("name");
+				latitude = rs.getDouble("latitude");
+				longitude = rs.getDouble("longitude");			
+				
+				City city = new City(id, name, latitude, longitude);
+				result.put(id, city);
+				
+			}
+
+			rs.close();
+			stm.close();
+			connection.close();
+
+		} catch (Exception e) {
+			Log.error(e);
 			return null;
 		}
 
@@ -99,14 +139,13 @@ public class CityDAO {
 			stm.setDouble(3, city.getLatitude());
 			stm.setDouble(4, city.getLongitude());
 
-			ResultSet rs = stm.executeQuery();
+			stm.executeUpdate();
 
-			rs.close();
 			stm.close();
 			connection.close();
 
 		} catch (Exception e) {
-			LogHelper.log.error(e);
+			Log.error(e);
 		}
 
 	}

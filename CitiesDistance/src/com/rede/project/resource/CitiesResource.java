@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,9 +19,10 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jfree.util.Log;
+
 import com.rede.project.dao.CityDAO;
 import com.rede.project.exception.CityNotFoundException;
-import com.rede.project.log.LogHelper;
 import com.rede.project.logic.DistanceLogic;
 import com.rede.project.provider.CityProviderEnum;
 
@@ -35,21 +37,26 @@ public class CitiesResource {
 	Request request;
 	
 	@GET
-	@Produces(MediaType.TEXT_XML)
+	@Produces(MediaType.APPLICATION_XML)
 	public List<City> getCitiesBrowser(){
-		List<City> cities = new ArrayList<>();
-		cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
+		List<City> cities = new ArrayList<>();		
+		try{
+			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
+		}catch(Exception e){
+			Log.error(e);
+		}
 		return cities;
 	}
 	
 	@GET
-	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	public List<City> getCities(){
 		List<City> cities = new ArrayList<>();
 		try{
 			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
 		}catch(Exception e){
-			e.getMessage();
+			Log.error(e);
 		}
 		return cities;
 	}
@@ -73,14 +80,15 @@ public class CitiesResource {
 		try{
 			new CityDAO().createCity(city);			
 		}catch(Exception e){
-			LogHelper.log.error(e);
+			Log.error(e);
 			return Response.serverError().build();
 		}
 		
 		CityProviderEnum.INSTANCE.getModel().put(id, city);			
 		URI createdURI = uriInfo.getAbsolutePath();
 		
-		return Response.created(createdURI).entity("City Created").build();		
+		return Response.created(createdURI).entity("City Created").build();
+		
 		
 	}
 	
