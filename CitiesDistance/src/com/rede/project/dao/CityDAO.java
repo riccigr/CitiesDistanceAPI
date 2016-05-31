@@ -6,17 +6,19 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jfree.util.Log;
-
 import com.rede.project.factory.ConnectionFactory;
+import com.rede.project.log.LogHelper;
 import com.rede.project.resource.City;
 
 public class CityDAO {
 	private Connection connection;
+	private static final String LATITUDE = "latitude";
+	private static final String LONGITUDE = "longitude";
+	private static final String NAME = "name";
+	private static final String ID = "id";
 
-	@SuppressWarnings("static-access")
 	public CityDAO() {
-		this.connection = new ConnectionFactory().getConnection();
+		this.connection  = ConnectionFactory.getInstance().getConnection();
 	}
 
 	public Map<String, Double> getLatLongById(String id) {
@@ -32,8 +34,8 @@ public class CityDAO {
 			ResultSet rs = stm.executeQuery();
 
 			while (rs.next()) {
-				result.put("latitude", rs.getDouble("latitude"));
-				result.put("longitude", rs.getDouble("longitude"));
+				result.put(LATITUDE, rs.getDouble(LATITUDE));
+				result.put(LONGITUDE, rs.getDouble(LONGITUDE));
 			}
 
 			rs.close();
@@ -41,7 +43,7 @@ public class CityDAO {
 			connection.close();
 
 		} catch (Exception e) {
-			Log.error(e);
+			LogHelper.LOG.error(e);
 			return null;
 		}
 
@@ -66,10 +68,10 @@ public class CityDAO {
 			ResultSet rs = stm.executeQuery();
 
 			while (rs.next()) {
-				id = rs.getString("id");
-				name = rs.getString("name");
-				latitude = rs.getDouble("latitude");
-				longitude = rs.getDouble("longitude");			
+				id = rs.getString(ID);
+				name = rs.getString(NAME);
+				latitude = rs.getDouble(LATITUDE);
+				longitude = rs.getDouble(LONGITUDE);			
 				
 				City city = new City(id, name, latitude, longitude);
 				result.put(id, city);
@@ -81,7 +83,7 @@ public class CityDAO {
 			connection.close();
 
 		} catch (Exception e) {
-			Log.error(e);
+			LogHelper.LOG.error(e);
 			return null;
 		}
 
@@ -105,10 +107,10 @@ public class CityDAO {
 			ResultSet rs = stm.executeQuery();
 
 			while (rs.next()) {
-				id = rs.getString("id");
-				name = rs.getString("name");
-				latitude = rs.getDouble("latitude");
-				longitude = rs.getDouble("longitude");			
+				id = rs.getString(ID);
+				name = rs.getString(NAME);
+				latitude = rs.getDouble(LATITUDE);
+				longitude = rs.getDouble(LONGITUDE);			
 				
 				City city = new City(id, name, latitude, longitude);
 				result.put(id, city);
@@ -120,7 +122,7 @@ public class CityDAO {
 			connection.close();
 
 		} catch (Exception e) {
-			Log.error(e);
+			LogHelper.LOG.error(e);
 			return null;
 		}
 
@@ -145,7 +147,7 @@ public class CityDAO {
 			connection.close();
 
 		} catch (Exception e) {
-			Log.error(e);
+			LogHelper.LOG.error(e);
 		}
 
 	}

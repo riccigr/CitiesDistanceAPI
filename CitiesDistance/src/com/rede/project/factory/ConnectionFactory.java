@@ -4,17 +4,24 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import org.jfree.util.Log;
-
-import com.rede.project.util.Utils;
+import com.rede.project.log.LogHelper;
 
 
 public class ConnectionFactory {
 	
-	 public ConnectionFactory(){}
+	private static ConnectionFactory dbInstance;
 	
-	//--
-	public static Connection getConnection() {
+	private ConnectionFactory(){}
+	
+	public static ConnectionFactory getInstance(){
+		if(dbInstance == null){
+			dbInstance = new ConnectionFactory();
+		}
+		return dbInstance;
+	}
+
+	
+	public Connection getConnection() {
 		
 		try {
 
@@ -26,28 +33,27 @@ public class ConnectionFactory {
 			String port = "3306";
 			String url = "jdbc:mysql://" + serverName +":"+ port + "/" + mydatabase;
 			String username = "root";
-			String password = "admin";//Utils.getDatabaseAccess();
+			String password = "admin";
 
 			return DriverManager.getConnection(url, username, password);
 
 		
 		} catch (Exception e) {
-			Log.error(e);
+			LogHelper.LOG.error(e);
 			return null;
 		}
 
 
 	}	
     
-    //---
     public static boolean closeConnection() {
 
         try {
-            ConnectionFactory.getConnection().close();
+            ConnectionFactory.getInstance().getConnection().close();
             return true;
 
         } catch (SQLException e) {
-        	Log.error(e);
+        	LogHelper.LOG.error(e);
             return false;
         }
 

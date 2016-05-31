@@ -14,21 +14,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-
-import org.jfree.util.Log;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import com.rede.project.dao.CityDAO;
 import com.rede.project.exception.CityNotFoundException;
+import com.rede.project.exception.CustomInternalException;
+import com.rede.project.log.LogHelper;
 import com.rede.project.logic.DistanceLogic;
+import com.rede.project.pojo.CityDistance;
 import com.rede.project.provider.CityProviderEnum;
 
 
 @Path("/cities")
-public class CitiesResource {
+public class CitiesResource implements ExceptionMapper<Exception> {
 	
 	@Context 
 	UriInfo uriInfo;
@@ -39,24 +43,25 @@ public class CitiesResource {
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
 	public List<City> getCitiesBrowser(){
-		List<City> cities = new ArrayList<>();		
+		List<City> cities = new ArrayList<>();
 		try{
 			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
 		}catch(Exception e){
-			Log.error(e);
+			LogHelper.LOG.error(e);
 		}
 		return cities;
 	}
 	
+	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<City> getCities(){
 		List<City> cities = new ArrayList<>();
 		try{
 			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
 		}catch(Exception e){
-			Log.error(e);
+			LogHelper.LOG.error(e);
 		}
 		return cities;
 	}
@@ -80,7 +85,7 @@ public class CitiesResource {
 		try{
 			new CityDAO().createCity(city);			
 		}catch(Exception e){
-			Log.error(e);
+			LogHelper.LOG.error(e);
 			return Response.serverError().build();
 		}
 		
@@ -88,8 +93,6 @@ public class CitiesResource {
 		URI createdURI = uriInfo.getAbsolutePath();
 		
 		return Response.created(createdURI).entity("City Created").build();
-		
-		
 	}
 	
 	@GET
@@ -112,11 +115,41 @@ public class CitiesResource {
 		
 	}
 	
-	
+	@GET
+	@Path("/alldistances")
+	@Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+	@Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+	public Response getAllDistance(@QueryParam("unit") String unit) throws IOException{
+		
+		List<CityDistance> distances = new ArrayList<>();
+		List<City> cities = new ArrayList<>();
+		try{
+			cities.addAll(CityProviderEnum.INSTANCE.getModel().values());
+			distances = new DistanceLogic().getAllDistances(cities, unit);
+		}catch(Exception e){
+			LogHelper.LOG.error(e);
+			throw new CustomInternalException();
+		}		
+		
+		GenericEntity<List<CityDistance>> entity = new GenericEntity<List<CityDistance>>(distances) {};
+		
+		return Response.ok().entity(entity).build();
+		
+	}
 	
 	@Path("{city}")
 	public CityResource getCities(@PathParam("city") String id){
 		return new CityResource(uriInfo, request, id);
+	}
+
+	@Override
+	public Response toResponse(Exception e) {
+        e.printStackTrace();
+        return Response
+                    .status(Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity(e.getCause())
+                    .build();
 	}
 	
 }

@@ -1,8 +1,10 @@
 package com.rede.project.logic;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import com.rede.project.dao.CityDAO;
+import com.rede.project.pojo.CityDistance;
 import com.rede.project.resource.City;
 
 public class DistanceLogic {
@@ -20,29 +22,49 @@ public class DistanceLogic {
 		
 	}
 	
+	
 	private double convertKmToMiles(double km){
 		return km * 0.621;		
 	}
 	
 	
+	
 	public double getDistance(City cityA, City cityB, String unit ){
 		
-		
-		Map<String, Double> mapCityA = new CityDAO().getLatLongById(cityA.getId());
-		Map<String, Double> mapCityB = new CityDAO().getLatLongById(cityB.getId());
-		
-		double latCityA = mapCityA.get("latitude").doubleValue();
-		double latCityB = mapCityB.get("latitude").doubleValue();
-		double lngCityA = mapCityA.get("longitude").doubleValue();
-		double lngCityB = mapCityB.get("longitude").doubleValue();
+		double latCityA = cityA.getLatitude();
+		double latCityB = cityB.getLatitude();
+		double lngCityA = cityA.getLongitude();
+		double lngCityB = cityB.getLongitude();
 		
 		double distance = calculeHaversine(latCityA, latCityB, lngCityA, lngCityB);	
 		
-		if(unit != null && "MILES".equalsIgnoreCase(unit)){
+		if(unit != null && "MI".equalsIgnoreCase(unit)){
 			distance = convertKmToMiles(distance);		
 		}
 		
 		return (double) Math.round(distance * 100) / 100;		
+	}
+
+	public List<CityDistance> getAllDistances(List<City> cities, String unit) {
+		
+		List<CityDistance> listCitiesDistances = new ArrayList<>();
+		List<City> auxListCities =  cities;
+		
+		for(Iterator<City> iterator = cities.iterator(); iterator.hasNext(); ){
+			City mainCity = iterator.next();			
+			for(City secondaryCity: auxListCities){
+				CityDistance distance = new CityDistance();
+				if(!mainCity.getId().equals(secondaryCity.getId())){
+					distance.setDistance(getDistance(mainCity, secondaryCity, unit));
+					distance.setCityA(mainCity);
+					distance.setCityB(secondaryCity);
+					listCitiesDistances.add(distance);
+				}
+			}
+			iterator.remove();
+		}
+				
+		return listCitiesDistances;
 	}
 	
 }
